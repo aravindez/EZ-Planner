@@ -27,6 +27,7 @@ drop table if exists `calendar`;
 create table `calendar` (
     id integer not null auto_increment,
     name varchar(255) not null,
+    color char(8) not null,
     description text default null,
     primary key (id)
 );
