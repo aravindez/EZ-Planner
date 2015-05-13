@@ -10,6 +10,8 @@ import java.awt.Container;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Color;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -19,6 +21,7 @@ import java.time.format.TextStyle;
 
 import java.util.Properties;
 import java.util.Locale;
+import java.util.ArrayList;
 
 import java.sql.*;
 
@@ -42,7 +45,7 @@ public class Planner extends JFrame implements Runnable
         JButton newTask = new JButton("New Task");
         JButton logout = new JButton("Logout");
         month.addActionListener(e -> { repaint(); });
-        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); /*x.add(makeWeek(today),BorderLayout.CENTER);*/ repaint(); });
+        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); x.add(makeWeek(today),BorderLayout.CENTER); repaint(); });
         day.addActionListener(e -> { repaint(); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]); });
         header.add(month);
@@ -114,15 +117,20 @@ public class Planner extends JFrame implements Runnable
         {
             JPanel temp = new JPanel();
             temp.setBorder(line);
+            temp.setBackground(new Color(255,255,255));
             month.add(new JPanel());
         }
-        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i.plusDays(1))
+        ArrayList<Tile> tiles = new ArrayList();
+        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i = i.plusDays(1))
         {
-            Tile temp = new Tile(i);
+            Tile tempTile = new Tile(i);
             if(i.compareTo(x) == 0)
-            { temp.setSelected(true); }
-            month.add(temp);
+            { tempTile.setSelected(true); }
+            tiles.add(tempTile);
+            month.add(tempTile);
         }
+        for (int i = 0; i < tiles.size(); i++)
+        { tiles.get(i).addMouseListener(new colorChanger(tiles)); }
 
         pane.add(makeHeader(x),BorderLayout.NORTH);
         pane.add(month,BorderLayout.CENTER);
@@ -160,4 +168,46 @@ public class Planner extends JFrame implements Runnable
 
     public static void main(String[] args)
     { javax.swing.SwingUtilities.invokeLater(new Planner(1)); }
+
+    class colorChanger extends Tile implements MouseListener
+    {
+        private ArrayList<Tile> tiles;
+
+        public colorChanger(ArrayList _tiles)
+        { tiles = _tiles; }
+
+        public void mousePressed(MouseEvent e) {}
+        public void mouseReleased(MouseEvent e) {}
+
+        public void mouseClicked(MouseEvent e)
+        {
+            if (getSelect())
+            {
+                setBackground(new Color(255,255,255));
+                setSelected(false);
+            }
+            else
+            {
+                setSelected(true);
+                setBackground(new Color(64,188,237));
+                for(int i = 0; i < tiles.size(); i++)
+                {
+                    if(!equals(tiles.get(i)))
+                    { tiles.get(i).setSelected(false); }
+                }
+            }
+        }
+    
+        public void mouseEntered(MouseEvent e)
+        {
+            if (!getSelect())
+            { setBackground(new Color(111,207,245)); }
+        }
+
+        public void mouseExited(MouseEvent e)
+        {
+            if (!getSelect())
+            { setBackground(new Color(255,255,255)); }
+        }
+    }
 }

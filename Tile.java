@@ -5,7 +5,6 @@ import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 
 import java.awt.Color;
-import java.awt.event.MouseListener;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -31,12 +30,20 @@ public class Tile extends JPanel
         this.year = date.getYear();
         this.selected = false;
         add(new JLabel(Integer.toString(daynum), SwingConstants.LEFT));
-        this.setBorder(line);
+        setBackground(new Color(255,255,255));
+        setBorder(line);
     }
 
     public Tile()
     { this(LocalDate.now()); }
 
+    public boolean getSelect()
+    { return selected; }
+
     public void setSelected(boolean flag)
-    { this.selected = flag; }
+    {
+        this.selected = flag;
+        if(flag)
+        { setBackground(new Color(64,188,237)); }
+    }
 }
