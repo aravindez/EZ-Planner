@@ -24,69 +24,127 @@ import java.sql.*;
 
 public class Planner extends JFrame implements Runnable
 {
-    private String state = "month";
     private LocalDate today = LocalDate.now(ZoneId.systemDefault());
     private Border raisedBevel = BorderFactory.createRaisedBevelBorder();
     private Border line = BorderFactory.createLineBorder(Color.black);
+    private int id;
 
-    public Planner()
-    { super("EZY-L Calendar"); }
+    public Planner(int _id)
+    { super("EZY-L Calendar"); id=_id; }
 
-    public JPanel makeHeader()
+    public JPanel makeHeaderButtons(Container x)
     {
         JPanel header = new JPanel();
-        header.setLayout(new GridLayout(2,1));
-
-        JPanel headerButtons = new JPanel();
-        headerButtons.setLayout(new GridLayout(1,5));
+        header.setLayout(new GridLayout(1,5));
         JButton month = new JButton("Month");
         JButton week = new JButton("Week");
         JButton day = new JButton("Day");
         JButton newTask = new JButton("New Task");
         JButton logout = new JButton("Logout");
-        month.addActionListener(e -> { state = "month"; System.out.println(state); repaint(); });
-        week.addActionListener(e -> { state = "week"; System.out.println(state); repaint(); });
-        day.addActionListener(e -> { state = "day"; System.out.println(state); repaint(); });
+        month.addActionListener(e -> { repaint(); });
+        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); /*x.add(makeWeek(today),BorderLayout.CENTER);*/ repaint(); });
+        day.addActionListener(e -> { repaint(); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]); });
-        headerButtons.add(month);
-        headerButtons.add(week);
-        headerButtons.add(day);
-        headerButtons.add(newTask);
-        headerButtons.add(logout);
+        header.add(month);
+        header.add(week);
+        header.add(day);
+        header.add(newTask);
+        header.add(logout);
 
-        JPanel monthHeader = new JPanel();
-        monthHeader.add(new JLabel(today.getMonth().getDisplayName(TextStyle.FULL,Locale.ENGLISH)));
-        monthHeader.setBorder(raisedBevel);
-
-        header.add(headerButtons);
-        header.add(monthHeader);
         return header;
     }
 
-    public JPanel makeCal()
+    public JPanel weekHeader()
     {
-        JPanel Cal = new JPanel();
-        Cal.setLayout(new GridLayout(5,7));
-        for(int i = 1; i < tellDay.tellDay(1,5,2015); i++)
+        JPanel weekHeader = new JPanel();
+        weekHeader.setLayout(new GridLayout(1,7));
+        JPanel sunday = new JPanel();
+        sunday.setBorder(line);
+        sunday.add(new JLabel("Sunday"));
+        weekHeader.add(sunday);
+        JPanel monday = new JPanel();
+        monday.setBorder(line);
+        monday.add(new JLabel("Monday"));
+        weekHeader.add(monday);
+        JPanel tuesday = new JPanel();
+        tuesday.setBorder(line);
+        tuesday.add(new JLabel("Tuesday"));
+        weekHeader.add(tuesday);
+        JPanel wednesday = new JPanel();
+        wednesday.setBorder(line);
+        wednesday.add(new JLabel("Wednesday"));
+        weekHeader.add(wednesday);
+        JPanel thursday = new JPanel();
+        thursday.setBorder(line);
+        thursday.add(new JLabel("Thursday"));
+        weekHeader.add(thursday);
+        JPanel friday = new JPanel();
+        friday.setBorder(line);
+        friday.add(new JLabel("Friday"));
+        weekHeader.add(friday);
+        JPanel saturday = new JPanel();
+        saturday.setBorder(line);
+        saturday.add(new JLabel("Saturday"));
+        weekHeader.add(saturday);
+        return weekHeader;
+    }
+
+    public JPanel makeHeader(LocalDate x)
+    {
+        JPanel monthHeader = new JPanel();
+        monthHeader.setLayout(new GridLayout(2,1));
+        JPanel monthName = new JPanel();
+        monthName.add(new JLabel(today.getMonth().getDisplayName(TextStyle.FULL,Locale.ENGLISH)),SwingConstants.CENTER);
+        JPanel weekHeader = weekHeader();
+        monthName.setBorder(line);
+        weekHeader.setBorder(line);
+        monthHeader.add(monthName);
+        monthHeader.add(weekHeader);
+        return monthHeader;
+    }
+
+    public JPanel makeMonth(LocalDate x)
+    {
+        JPanel pane = new JPanel();
+        pane.setLayout(new BorderLayout());
+        
+        JPanel month = new JPanel();
+        month.setLayout(new GridLayout(5,7));
+        for(int i = 1; i < tellDay.tellDay(1,x.getMonthValue(),x.getYear()); i++)
         {
             JPanel temp = new JPanel();
             temp.setBorder(line);
-            Cal.add(new JPanel());
+            month.add(new JPanel());
         }
-        for(int i = 1; i <= 31; i++)
+        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i.plusDays(1))
         {
-            JPanel temp = new JPanel();
-            temp.add(new JLabel(Integer.toString(i),SwingConstants.LEFT));
-            temp.setBorder(line);
-            Cal.add(temp);
+            Tile temp = new Tile(i);
+            if(i.compareTo(x) == 0)
+            { temp.setSelected(true); }
+            month.add(temp);
         }
-        for(int i = 1; i < tellDay.tellDay(31,5,2015); i++)
-        {
-            JPanel temp = new JPanel();
-            temp.setBorder(line);
-            Cal.add(new JPanel());
-        }
-        return Cal;
+
+        pane.add(makeHeader(x),BorderLayout.NORTH);
+        pane.add(month,BorderLayout.CENTER);
+        return pane;
+    }
+
+    public JPanel makeWeek(LocalDate x)
+    {
+        JPanel week = new JPanel();
+        week.setLayout(new BorderLayout());
+
+        JPanel days = new JPanel();
+        days.setLayout(new GridLayout(1,7));
+        for(long i = x.getDayOfWeek().getValue(); i > 0; i--)
+        { days.add(new Tile(x.minusDays(i))); }
+        days.add(new Tile(x));
+        for(long i = x.getDayOfWeek().getValue(); i < 6; i++)
+        { days.add(new Tile(x.plusDays(i))); }
+
+        week.add(makeHeader(x),BorderLayout.NORTH);
+        week.add(days,BorderLayout.CENTER);
+        return week;
     }
 
     public void run()
@@ -95,11 +153,11 @@ public class Planner extends JFrame implements Runnable
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
-        cp.add(makeHeader(), BorderLayout.NORTH);
-        cp.add(makeCal(), BorderLayout.CENTER);
+        cp.add(makeHeaderButtons(cp), BorderLayout.NORTH);
+        cp.add(makeMonth(today), BorderLayout.CENTER);
         setVisible(true);
     }
 
     public static void main(String[] args)
-    { javax.swing.SwingUtilities.invokeLater(new Planner()); }
+    { javax.swing.SwingUtilities.invokeLater(new Planner(1)); }
 }
