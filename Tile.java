@@ -45,5 +45,7 @@ public class Tile extends JPanel
         this.selected = flag;
         if(flag)
         { setBackground(new Color(64,188,237)); }
+        else
+        { setBackground(new Color(255,255,255)); }
     }
 }

@@ -181,18 +181,19 @@ public class Planner extends JFrame implements Runnable
 
         public void mouseClicked(MouseEvent e)
         {
-            if (getSelect())
+            Tile tile = (Tile) e.getSource();
+            if (tile.getSelect())
             {
-                setBackground(new Color(255,255,255));
-                setSelected(false);
+                tile.setBackground(new Color(255,255,255));
+                tile.setSelected(false);
             }
             else
             {
-                setSelected(true);
-                setBackground(new Color(64,188,237));
+                tile.setSelected(true);
+                tile.setBackground(new Color(64,188,237));
                 for(int i = 0; i < tiles.size(); i++)
                 {
-                    if(!equals(tiles.get(i)))
+                    if(!tile.equals(tiles.get(i)))
                     { tiles.get(i).setSelected(false); }
                 }
             }
@@ -200,14 +201,16 @@ public class Planner extends JFrame implements Runnable
     
         public void mouseEntered(MouseEvent e)
         {
-            if (!getSelect())
-            { setBackground(new Color(111,207,245)); }
+            Tile tile = (Tile) e.getSource();
+            if (!tile.getSelect())
+            { tile.setBackground(new Color(111,207,245)); }
         }
 
         public void mouseExited(MouseEvent e)
         {
-            if (!getSelect())
-            { setBackground(new Color(255,255,255)); }
+            Tile tile = (Tile) e.getSource();
+            if (!tile.getSelect())
+            { tile.setBackground(new Color(255,255,255)); }
         }
     }
 }
