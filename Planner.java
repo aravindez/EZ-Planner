@@ -44,8 +44,8 @@ public class Planner extends JFrame implements Runnable
         JButton day = new JButton("Day");
         JButton newTask = new JButton("New Task");
         JButton logout = new JButton("Logout");
-        month.addActionListener(e -> { repaint(); });
-        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); x.add(makeWeek(today),BorderLayout.CENTER); repaint(); });
+        month.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); x.add(makeMonth(today),BorderLayout.CENTER); setVisible(true); repaint(); });
+        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); x.add(makeWeek(today),BorderLayout.CENTER); setVisible(true); repaint(); });
         day.addActionListener(e -> { repaint(); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]); });
         header.add(month);
@@ -144,11 +144,25 @@ public class Planner extends JFrame implements Runnable
 
         JPanel days = new JPanel();
         days.setLayout(new GridLayout(1,7));
+        ArrayList<Tile> tiles = new ArrayList();
         for(long i = x.getDayOfWeek().getValue(); i > 0; i--)
-        { days.add(new Tile(x.minusDays(i))); }
-        days.add(new Tile(x));
+        {
+            Tile temp = new Tile(x.minusDays(i));
+            tiles.add(temp);
+            days.add(temp);
+        }
+        Tile now = new Tile(x);
+        now.setSelected(true);
+        tiles.add(now);
+        days.add(now);
         for(long i = x.getDayOfWeek().getValue(); i < 6; i++)
-        { days.add(new Tile(x.plusDays(i))); }
+        {
+            Tile temp = new Tile(x.plusDays(i));
+            tiles.add(temp);
+            days.add(temp);
+        }
+        for(int i = 0; i < tiles.size(); i++)
+        { tiles.get(i).addMouseListener(new colorChanger(tiles)); }
 
         week.add(makeHeader(x),BorderLayout.NORTH);
         week.add(days,BorderLayout.CENTER);
