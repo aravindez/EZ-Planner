@@ -120,10 +120,10 @@ public class Planner extends JFrame implements Runnable
             temp.setBackground(new Color(255,255,255));
             month.add(new JPanel());
         }
-        ArrayList<Tile> tiles = new ArrayList();
+        ArrayList<calTile> tiles = new ArrayList();
         for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i = i.plusDays(1))
         {
-            Tile tempTile = new Tile(i);
+            calTile tempTile = new calTile(i);
             if(i.compareTo(x) == 0)
             { tempTile.setSelected(true); }
             tiles.add(tempTile);
@@ -144,20 +144,20 @@ public class Planner extends JFrame implements Runnable
 
         JPanel days = new JPanel();
         days.setLayout(new GridLayout(1,7));
-        ArrayList<Tile> tiles = new ArrayList();
+        ArrayList<calTile> tiles = new ArrayList();
         for(long i = x.getDayOfWeek().getValue(); i > 0; i--)
         {
-            Tile temp = new Tile(x.minusDays(i));
+            calTile temp = new calTile(x.minusDays(i));
             tiles.add(temp);
             days.add(temp);
         }
-        Tile now = new Tile(x);
+        calTile now = new calTile(x);
         now.setSelected(true);
         tiles.add(now);
         days.add(now);
         for(long i = x.getDayOfWeek().getValue(); i < 6; i++)
         {
-            Tile temp = new Tile(x.plusDays(i));
+            calTile temp = new calTile(x.plusDays(i));
             tiles.add(temp);
             days.add(temp);
         }
@@ -183,9 +183,9 @@ public class Planner extends JFrame implements Runnable
     public static void main(String[] args)
     { javax.swing.SwingUtilities.invokeLater(new Planner(1)); }
 
-    class colorChanger extends Tile implements MouseListener
+    class colorChanger extends calTile implements MouseListener
     {
-        private ArrayList<Tile> tiles;
+        private ArrayList<calTile> tiles;
 
         public colorChanger(ArrayList _tiles)
         { tiles = _tiles; }
@@ -195,7 +195,7 @@ public class Planner extends JFrame implements Runnable
 
         public void mouseClicked(MouseEvent e)
         {
-            Tile tile = (Tile) e.getSource();
+            calTile tile = (calTile) e.getSource();
             if (tile.getSelect())
             {
                 tile.setBackground(new Color(255,255,255));
@@ -215,14 +215,14 @@ public class Planner extends JFrame implements Runnable
     
         public void mouseEntered(MouseEvent e)
         {
-            Tile tile = (Tile) e.getSource();
+            calTile tile = (calTile) e.getSource();
             if (!tile.getSelect())
             { tile.setBackground(new Color(111,207,245)); }
         }
 
         public void mouseExited(MouseEvent e)
         {
-            Tile tile = (Tile) e.getSource();
+            calTile tile = (calTile) e.getSource();
             if (!tile.getSelect())
             { tile.setBackground(new Color(255,255,255)); }
         }
