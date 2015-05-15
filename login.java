@@ -21,11 +21,12 @@ public class login extends JFrame implements Runnable
     public login()
     { super("EZY-L Calendar"); }
 
-    public int validate(JTextField u, JTextField p)
+    public Integer[] validate(JTextField u, JTextField p)
     {
         Connection conn = null;
         Statement stmt = null;
-        int id = 0;
+        int userid = 0;
+        int calid = 0;
         try{
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(dburl,user,pass);
@@ -36,8 +37,15 @@ public class login extends JFrame implements Runnable
             ResultSet rs = stmt.executeQuery(valid);
 
             while(rs.next())
-            { id = rs.getInt("id"); }
+            { userid = rs.getInt("id"); }
             rs.close();
+
+            String cal = String.format("SELECT calendar_id FROM user_calendar WHERE user_id=%s;", userid);
+            ResultSet rsCal = stmt.executeQuery(cal);
+
+            while(rsCal.next())
+            { calid = rs.getInt("calendar_id"); break; }
+
             stmt.close();
             conn.close();
         }
@@ -48,7 +56,8 @@ public class login extends JFrame implements Runnable
             catch(SQLException se2) {}
             try{ if(conn!=null) { conn.close(); } }
             catch(SQLException se) { se.printStackTrace(); } }
-        return id;
+        Integer[] ret = {userid, calid};
+        return ret;
     }
 
     public void run()
@@ -64,8 +73,8 @@ public class login extends JFrame implements Runnable
         JButton signin = new JButton("Sign In");
         JButton exit = new JButton("Exit");
         signin.addActionListener(e -> {
-            int check = validate(username, password);
-            if (check == 0)
+            Integer[] check = validate(username, password);
+            if (check[0] == 0)
             {
                 username.setText("wrong username or password");
                 password.setText("");
@@ -73,8 +82,7 @@ public class login extends JFrame implements Runnable
             else
             {
                 dispose();
-                String[] cred = {Integer.toString(check)};
-                Planner.main(cred);
+                Planner.main(check);
             }
         });
         exit.addActionListener(e -> { System.exit(0); });

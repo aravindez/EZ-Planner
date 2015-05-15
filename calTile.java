@@ -11,31 +11,34 @@ import java.time.Month;
 import java.time.DayOfWeek;
 import java.time.ZoneId;
 
+import java.util.Properties;
+import java.util.ArrayList;
+
+import java.sql.*;
+
 public class calTile extends JPanel
 {
     private LocalDate date;
-    private Month month;
-    private int daynum;
-    private DayOfWeek day;
-    private int year;
+    private int calid;
+    private ArrayList<Task> taskList;
     private boolean selected;
     private Border line = BorderFactory.createLineBorder(Color.black);
 
-    public calTile(LocalDate _date)
+    private static final String jdbcDriver = "com.mysql.jdbc.Driver";
+    private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
+    static final String user = "root";
+    static final String pass = "avihome";
+
+    public calTile(LocalDate _date, int _calid)
     {
         this.date = _date;
-        this.month = date.getMonth();
-        this.daynum = date.getDayOfMonth();
-        this.day = date.getDayOfWeek();
-        this.year = date.getYear();
+        this.calid = _calid;
+        this.taskList = calTile.getTaskList(calid, date);
         this.selected = false;
-        add(new JLabel(Integer.toString(daynum), SwingConstants.LEFT));
+        add(new JLabel(Integer.toString(date.getDayOfMonth()), SwingConstants.LEFT));
         setBackground(new Color(255,255,255));
         setBorder(line);
     }
-
-    public calTile()
-    { this(LocalDate.now()); }
 
     public boolean getSelect()
     { return selected; }
@@ -47,5 +50,34 @@ public class calTile extends JPanel
         { setBackground(new Color(64,188,237)); }
         else
         { setBackground(new Color(255,255,255)); }
+    }
+
+    private static ArrayList<Task> getTaskList(int calid, LocalDate date)
+    {
+        ArrayList<Task> list = new ArrayList<Task>();
+        Connection conn = null;
+        Statement stmt = null;
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(dburl,user,pass);
+
+            stmt = conn.createStatement();
+            String valid = String.format("SELECT id FROM task INNER JOIN calendar_task AS ct ON ct.task_id=task.id WHERE ct.calendar_id=%d AND due='%d-%d-%d';", calid, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+            ResultSet rs = stmt.executeQuery(valid);
+
+            while(rs.next())
+            { list.add(new Task(rs.getInt("id"))); }
+            rs.close();
+            stmt.close();
+            conn.close();
+        }
+        catch(SQLException se) { se.printStackTrace(); }
+        catch(Exception e) { e.printStackTrace(); }
+        finally{
+            try{ if(stmt!=null) { stmt.close(); } }
+            catch(SQLException se2) {}
+            try{ if(conn!=null) { conn.close(); } }
+            catch(SQLException se) { se.printStackTrace(); } }
+        return list;
     }
 }

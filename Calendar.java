@@ -4,12 +4,12 @@ import java.sql.*;
 
 public class Calendar
 {
-    private int id;
-    private String name;
-    private int red;
-    private int green;
-    private int blue;
-    private String description;
+    public int id;
+    public String name;
+    public int red;
+    public int green;
+    public int blue;
+    public String description;
 
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
     private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
@@ -26,7 +26,7 @@ public class Calendar
             conn = DriverManager.getConnection(dburl,user,pass);
 
             stmt = conn.createStatement();
-            String valid = String.format("SELECT id, name, color, description FROM calendar id=%s;", Integer.toString(_id));
+            String valid = String.format("SELECT id, name, color, description FROM calendar WHERE id=%s;", Integer.toString(_id));
             ResultSet rs = stmt.executeQuery(valid);
 
             while(rs.next())
