@@ -32,13 +32,18 @@ public class Planner extends JFrame implements Runnable
     private Border line = BorderFactory.createLineBorder(Color.black);
     private int id;
 
+    private static final String jdbcDriver = "com.mysql.jdbc.Driver";
+    private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
+    static final String user = "root";
+    static final String pass = "avihome";
+
     public Planner(int _id)
     { super("EZY-L Calendar"); id=_id; }
 
     public JPanel makeHeaderButtons(Container x)
     {
         JPanel header = new JPanel();
-        header.setLayout(new GridLayout(1,5));
+       header.setLayout(new GridLayout(1,5));
         JButton month = new JButton("Month");
         JButton week = new JButton("Week");
         JButton day = new JButton("Day");
@@ -55,6 +60,35 @@ public class Planner extends JFrame implements Runnable
         header.add(logout);
 
         return header;
+    }
+
+    public JPanel makeSideBar()
+    {
+        Connection conn = null;
+        Statement stmt = null;
+        int id = 0;
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(dburl,user,pass);
+            String[] cred = {u.getText(), p.getText()};
+
+            stmt = conn.createStatement();
+            String valid = String.format("SELECT id FROM user WHERE username='%s' AND password=MD5('%s');", u.getText(), p.getText());
+            ResultSet rs = stmt.executeQuery(valid);
+
+            while(rs.next())
+            { id = rs.getInt("id"); }
+            rs.close();
+            stmt.close();
+            conn.close();
+        }
+        catch(SQLException se) { se.printStackTrace(); }
+        catch(Exception e) { e.printStackTrace(); }
+        finally{
+            try{ if(stmt!=null) { stmt.close(); } }
+            catch(SQLException se2) {}
+            try{ if(conn!=null) { conn.close(); } }
+            catch(SQLException se) { se.printStackTrace(); } }
     }
 
     public JPanel weekHeader()
