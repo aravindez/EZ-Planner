@@ -40,6 +40,9 @@ public class calTile extends JPanel
         setBorder(line);
     }
 
+    public calTile()
+    { this(LocalDate.now(),1); }
+
     public boolean getSelect()
     { return selected; }
 

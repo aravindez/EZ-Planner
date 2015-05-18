@@ -46,6 +46,9 @@ public class dayTile extends JPanel
         setBorder(line);
     }
 
+    public dayTile()
+    { this(LocalDate.now(),1); }
+
     public boolean getSelect()
     { return selected; }
 

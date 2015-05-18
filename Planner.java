@@ -54,7 +54,7 @@ public class Planner extends JFrame implements Runnable
         JButton logout = new JButton("Logout");
         month.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeMonth(today),BorderLayout.CENTER); setVisible(true); repaint(); });
         week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeWeek(today),BorderLayout.CENTER); setVisible(true); repaint(); });
-        day.addActionListener(e -> { repaint(); });
+        day.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeDay(today),BorderLayout.CENTER); setVisible(true); repaint(); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]); });
         header.add(month);
         header.add(week);
@@ -102,7 +102,6 @@ public class Planner extends JFrame implements Runnable
         buttons.setLayout(new GridLayout(calList.size(),1));
         for(Calendar i : calList)
         {
-            System.out.println("hit");
             JButton temp = new JButton("  "+i.name+"  ");
             temp.addActionListener(e ->
                 {
@@ -189,8 +188,8 @@ public class Planner extends JFrame implements Runnable
             tiles.add(tempTile);
             month.add(tempTile);
         }
-//        for (int i = 0; i < tiles.size(); i++)
-//        { tiles.get(i).addMouseListener(new colorChanger<calTile>(tiles)); }
+        for (int i = 0; i < tiles.size(); i++)
+        { tiles.get(i).addMouseListener(new calColorChanger1(tiles)); }
 
         pane.add(makeHeader(x),BorderLayout.NORTH);
         pane.add(month,BorderLayout.CENTER);
@@ -221,12 +220,23 @@ public class Planner extends JFrame implements Runnable
             tiles.add(temp);
             days.add(temp);
         }
-//        for(int i = 0; i < tiles.size(); i++)
-//        { tiles.get(i).addMouseListener(new colorChanger<dayTile>(tiles)); }
+        for(int i = 0; i < tiles.size(); i++)
+        { tiles.get(i).addMouseListener(new calColorChanger2(tiles)); }
 
         week.add(makeHeader(x),BorderLayout.NORTH);
         week.add(days,BorderLayout.CENTER);
         return week;
+    }
+
+    public JPanel makeDay(LocalDate x)
+    {
+        JPanel day = new JPanel();
+        day.setLayout(new BorderLayout());
+        JPanel header = new JPanel();
+        header.add(new JLabel(x.getDayOfWeek().getDisplayName(TextStyle.FULL,Locale.ENGLISH)));
+        day.add(header,BorderLayout.NORTH);
+        day.add(new dayTile(x,calid));
+        return day;
     }
 
     public void run()
@@ -235,6 +245,8 @@ public class Planner extends JFrame implements Runnable
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
+        //SplashScreen splash = new SplashScreen(10000);
+        //splash.showSplashAndExit();
         cp.add(makeHeaderButtons(cp), BorderLayout.NORTH);
         cp.add(makeSideBar(), BorderLayout.WEST);
         cp.add(makeMonth(today), BorderLayout.CENTER);
@@ -244,11 +256,11 @@ public class Planner extends JFrame implements Runnable
     public static void main(String[] args)
     { javax.swing.SwingUtilities.invokeLater(new Planner(1,1)); }
 
-    class calColorChanger<calTile> extends calTile implements MouseListener
+    class calColorChanger1 extends calTile implements MouseListener
     {
         private ArrayList<calTile> tiles;
     
-        public calColorChanger(ArrayList<calTile> _tiles)
+        public calColorChanger1(ArrayList<calTile> _tiles)
         { tiles = _tiles; }
     
         public void mousePressed(MouseEvent e) {}
@@ -289,15 +301,17 @@ public class Planner extends JFrame implements Runnable
         }
     }
 
-    class calColorChanger<dayTile> extends dayTile implements MouseListener
+    class calColorChanger2 extends dayTile implements MouseListener
     {
         private ArrayList<dayTile> tiles;
     
-        public calColorChanger(ArrayList<dayTile> _tiles)
+        public calColorChanger2(ArrayList<dayTile> _tiles)
         { tiles = _tiles; }
     
         public void mousePressed(MouseEvent e) {}
         public void mouseReleased(MouseEvent e) {}
+        public void mouseEntered(MouseEvent e) {}
+        public void mouseExited(MouseEvent e) {}
     
         public void mouseClicked(MouseEvent e)
         {

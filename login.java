@@ -21,7 +21,7 @@ public class login extends JFrame implements Runnable
     public login()
     { super("EZY-L Calendar"); }
 
-    public Integer[] validate(JTextField u, JTextField p)
+    public String[] validate(JTextField u, JTextField p)
     {
         Connection conn = null;
         Statement stmt = null;
@@ -56,7 +56,7 @@ public class login extends JFrame implements Runnable
             catch(SQLException se2) {}
             try{ if(conn!=null) { conn.close(); } }
             catch(SQLException se) { se.printStackTrace(); } }
-        Integer[] ret = {userid, calid};
+        String[] ret = {Integer.toString(userid), Integer.toString(calid)};
         return ret;
     }
 
@@ -73,8 +73,8 @@ public class login extends JFrame implements Runnable
         JButton signin = new JButton("Sign In");
         JButton exit = new JButton("Exit");
         signin.addActionListener(e -> {
-            Integer[] check = validate(username, password);
-            if (check[0] == 0)
+            String[] check = validate(username, password);
+            if (Integer.parseInt(check[0]) == 0)
             {
                 username.setText("wrong username or password");
                 password.setText("");
