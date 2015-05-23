@@ -20,7 +20,6 @@ public class Calendar
     {
         Connection conn = null;
         Statement stmt = null;
-        int id = 0;
         try{
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(dburl,user,pass);
@@ -35,7 +34,7 @@ public class Calendar
                 name = rs.getString("name");
                 red = Integer.valueOf(rs.getString("color").substring(0,3));
                 green = Integer.valueOf(rs.getString("color").substring(3,6));
-                blue = Integer.valueOf(rs.getString("color").substring(6,9));
+                blue = Integer.valueOf(rs.getString("color").substring(6));
                 description = rs.getString("description");
             }
             rs.close();

@@ -21,7 +21,7 @@ import java.sql.*;
 public class dayTile extends JPanel
 {
     private LocalDate date;
-    private int calid;
+    private Calendar cal;
     private ArrayList<Task> taskList;
     private ArrayList<JPanel> timeSlots;
     private boolean selected;
@@ -32,11 +32,11 @@ public class dayTile extends JPanel
     static final String user = "root";
     static final String pass = "avihome";
 
-    public dayTile(LocalDate _date, int _calid)
+    public dayTile(LocalDate _date, Calendar _cal)
     {
         this.date = _date;
-        this.calid = _calid;
-        this.taskList = dayTile.getTaskList(calid, date);
+        this.cal = _cal;
+        this.taskList = dayTile.getTaskList(cal.id, date);
         
         this.selected = false;
         //for(int i = 0; i < 96; i++)
@@ -47,7 +47,7 @@ public class dayTile extends JPanel
     }
 
     public dayTile()
-    { this(LocalDate.now(),1); }
+    { this(LocalDate.now(), new Calendar(1)); }
 
     public boolean getSelect()
     { return selected; }
@@ -56,7 +56,7 @@ public class dayTile extends JPanel
     {
         this.selected = flag;
         if(flag)
-        { setBackground(new Color(64,188,237)); }
+        { setBackground(new Color(120,120,120)); }
         else
         { setBackground(new Color(255,255,255)); }
     }

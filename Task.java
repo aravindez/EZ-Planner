@@ -6,12 +6,12 @@ import java.sql.*;
 
 public class Task
 {
-    private int id;
-    private String name;
-    private LocalDate created_on;
-    private LocalDate due;
-    private String content;
-    private boolean complete;
+    public int id;
+    public String name;
+    public LocalDate created_on;
+    public LocalDate due;
+    public String content;
+    public boolean complete;
 
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
     private static final String dburl = "jdbc:mysql://127.0.0.1/cal";

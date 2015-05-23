@@ -5,6 +5,7 @@ import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 
 import java.awt.Color;
+import java.awt.GridLayout;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -19,7 +20,7 @@ import java.sql.*;
 public class calTile extends JPanel
 {
     private LocalDate date;
-    private int calid;
+    public Calendar cal;
     private ArrayList<Task> taskList;
     private boolean selected;
     private Border line = BorderFactory.createLineBorder(Color.black);
@@ -29,19 +30,27 @@ public class calTile extends JPanel
     static final String user = "root";
     static final String pass = "avihome";
 
-    public calTile(LocalDate _date, int _calid)
+    public calTile(LocalDate _date, Calendar _cal)
     {
         this.date = _date;
-        this.calid = _calid;
-        this.taskList = calTile.getTaskList(calid, date);
+        this.cal = _cal;
+        this.taskList = calTile.getTaskList(cal.id, date);
         this.selected = false;
+        setLayout(new GridLayout(6,1));
         add(new JLabel(Integer.toString(date.getDayOfMonth()), SwingConstants.LEFT));
+        for(int i = 0; i < 5; i++)
+        {
+            try
+            { add(new JLabel(taskList.get(i).name)); }
+            catch (IndexOutOfBoundsException e)
+            { break; }
+        }
         setBackground(new Color(255,255,255));
         setBorder(line);
     }
 
     public calTile()
-    { this(LocalDate.now(),1); }
+    { this(LocalDate.now(), new Calendar(1)); }
 
     public boolean getSelect()
     { return selected; }
@@ -50,7 +59,7 @@ public class calTile extends JPanel
     {
         this.selected = flag;
         if(flag)
-        { setBackground(new Color(64,188,237)); }
+        { setBackground(new Color(120,120,120)); }
         else
         { setBackground(new Color(255,255,255)); }
     }
