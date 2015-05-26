@@ -147,10 +147,6 @@ public class Planner extends JFrame implements Runnable
             temp.addActionListener(e ->
                 {
                     cal = new Calendar(i.id);
-                    mainPane.removeAll();
-                    mainPane.add(makeMonth(today, cal),BorderLayout.CENTER);
-                    makeTaskList();
-                    mainPane.add(makeTaskBar(taskList),BorderLayout.EAST);
                     descPane.removeAll();
                     descPane.add(new JLabel(i.description));
                     descPane.setVisible(true);
@@ -161,15 +157,6 @@ public class Planner extends JFrame implements Runnable
         sidebar.add(buttons, BorderLayout.NORTH);
         sidebar.add(descPane, BorderLayout.SOUTH);
         return sidebar;
-    }
-
-    public JPanel makeTaskBar(ArrayList<Task> taskList)
-    {
-        JPanel taskBar = new JPanel();
-        taskBar.setLayout(new GridLayout(taskList.size(),1));
-        for(Task i : taskList)
-        { taskBar.add(new JLabel(i.name)); }
-        return taskBar;
     }
 
     public JPanel weekHeader()
@@ -297,7 +284,6 @@ public class Planner extends JFrame implements Runnable
 
     public void run()
     {
-        System.out.println(cal.id);
         setSize(1050,725);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         cp.setLayout(new BorderLayout());
@@ -306,7 +292,6 @@ public class Planner extends JFrame implements Runnable
         makeTaskList();
         mainPane.setLayout(new BorderLayout());
         mainPane.add(makeMonth(today, cal),BorderLayout.CENTER);
-        mainPane.add(makeTaskBar(taskList),BorderLayout.EAST);
         cp.add(mainPane, BorderLayout.CENTER);
         setVisible(true);
     }
