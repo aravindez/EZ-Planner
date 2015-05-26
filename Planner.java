@@ -34,7 +34,6 @@ public class Planner extends JFrame implements Runnable
     private int userid;
     private Calendar cal;
     private Container cp = getContentPane();
-    private ArrayList<Task> taskList = new ArrayList<Task>();
     private String state = "month";
 
     private JPanel descPane = new JPanel();
@@ -46,36 +45,40 @@ public class Planner extends JFrame implements Runnable
     static final String pass = "avihome";
 
     public Planner(int _userid, Calendar _cal)
-    { super("EZ-Planner"); userid=_userid; cal=_cal;}
+    { super("EZYLAL Calendar"); userid=_userid; cal=_cal;}
 
+    // refreshes the month view
     public void monthRefresh()
     {
         cp.removeAll();
-        cp.add(makeHeaderButtons(cp),BorderLayout.NORTH);
+        cp.add(makeHeaderButtons(),BorderLayout.NORTH);
         cp.add(makeSideBar(),BorderLayout.WEST);
         cp.add(makeMonth(today,cal),BorderLayout.CENTER);
         setVisible(true); 
     }
 
+    // refreshes the week view
     public void weekRefresh()
     {
         cp.removeAll(); 
-        cp.add(makeHeaderButtons(cp),BorderLayout.NORTH); 
+        cp.add(makeHeaderButtons(),BorderLayout.NORTH); 
         cp.add(makeSideBar(),BorderLayout.WEST);
         cp.add(makeWeek(today),BorderLayout.CENTER);
         setVisible(true);
     }
 
+    // refreshes the day view
     public void dayRefresh()
     {
         cp.removeAll();
-        cp.add(makeHeaderButtons(cp),BorderLayout.NORTH);
+        cp.add(makeHeaderButtons(),BorderLayout.NORTH);
         cp.add(makeSideBar(),BorderLayout.WEST);
         cp.add(makeDay(today),BorderLayout.CENTER);
         setVisible(true); 
     }
 
-    public JPanel makeHeaderButtons(Container x)
+    // makes the navigational buttons at the top of the view
+    public JPanel makeHeaderButtons()
     {
         JPanel header = new JPanel();
         header.setLayout(new GridLayout(1,5));
@@ -98,37 +101,10 @@ public class Planner extends JFrame implements Runnable
         return header;
     }
 
-    public void makeTaskList()
-    {
-        Connection conn1 = null;
-        Statement stmt1 = null;
-        try{
-        Class.forName("com.mysql.jdbc.Driver");
-        conn1 = DriverManager.getConnection(dburl,user,pass);
-        
-        stmt1 = conn1.createStatement();
-        String tasks = String.format("SELECT id FROM task AS t INNER JOIN calendar_task AS ct ON ct.task_id=t.id WHERE ct.calendar_id=%d;", cal.id);
-        ResultSet rs = stmt1.executeQuery(tasks);
-        
-        while(rs.next())
-        { taskList.clear(); taskList.add(new Task(rs.getInt("id"))); }
-        rs.close();
-        stmt1.close();
-        conn1.close();
-        }
-        catch(SQLException se) { se.printStackTrace(); }
-        catch(Exception e1) { e1.printStackTrace(); }
-        finally{
-            try{ if(stmt1!=null) { stmt1.close(); } }
-            catch(SQLException se2) {}
-            try{ if(conn1!=null) { conn1.close(); } }
-            catch(SQLException se) { se.printStackTrace(); } }
-    }
-
+    // constructs the sidebar that helps you navigate through the different calendars you own
     public JPanel makeSideBar()
     {
         JPanel sidebar = new JPanel();
-        //sidebar.setPreferredSize(new Dimension(175,725));
         sidebar.setLayout(new BorderLayout());
         sidebar.setBorder(line);
         descPane.setLayout(new GridLayout(1,1));
@@ -182,9 +158,11 @@ public class Planner extends JFrame implements Runnable
         return sidebar;
     }
 
+    // creates the weekday labels
     public JPanel weekHeader()
     {
         JPanel weekHeader = new JPanel();
+        weekHeader.setBorder(line);
         weekHeader.setLayout(new GridLayout(1,7));
         JPanel sunday = new JPanel();
         sunday.setBorder(line);
@@ -217,20 +195,20 @@ public class Planner extends JFrame implements Runnable
         return weekHeader;
     }
 
-    public JPanel makeHeader(LocalDate x)
+    // makes the month name and weekday labels
+    public JPanel makeHeader()
     {
         JPanel monthHeader = new JPanel();
         monthHeader.setLayout(new GridLayout(2,1));
         JPanel monthName = new JPanel();
         monthName.add(new JLabel(today.getMonth().getDisplayName(TextStyle.FULL,Locale.ENGLISH)),SwingConstants.CENTER);
-        JPanel weekHeader = weekHeader();
         monthName.setBorder(line);
-        weekHeader.setBorder(line);
         monthHeader.add(monthName);
-        monthHeader.add(weekHeader);
+        monthHeader.add(weekHeader());
         return monthHeader;
     }
 
+    // constructs the month view for a given date and calendar
     public JPanel makeMonth(LocalDate x, Calendar _cal)
     {
         JPanel pane = new JPanel();
@@ -239,13 +217,17 @@ public class Planner extends JFrame implements Runnable
         JPanel month = new JPanel();
         month.setLayout(new GridLayout(6,7));
 
+        // creates variables for the first of the month and the end of the month
         long firstDay = LocalDate.of(x.getYear(),x.getMonth(),1).getDayOfWeek().getValue(); 
         if(firstDay == 7) {firstDay = 0;}
         long lastDay = LocalDate.of(x.getYear(),x.getMonth(),x.getMonth().maxLength()).getDayOfWeek().getValue();
         if(lastDay == 7) {lastDay = 0;}
 
+        // creates the blank jpanels before the first of the month
         for(long i = 0; i < firstDay; i++)
         { month.add(new JPanel()); }
+
+        // creates the actual month
         ArrayList<Tile> tiles = new ArrayList();
         for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i = i.plusDays(1))
         {
@@ -255,12 +237,14 @@ public class Planner extends JFrame implements Runnable
             tiles.add(tempTile);
             month.add(tempTile);
         }
+
+        // creates the blank days after then end of the month
         for(long i = 0; i < 6 - lastDay; i++)
         { month.add(new JPanel()); }
         for (int i = 0; i < tiles.size(); i++)
         { tiles.get(i).addMouseListener(new calColorChanger(tiles)); }
 
-        pane.add(makeHeader(x),BorderLayout.NORTH);
+        pane.add(makeHeader(),BorderLayout.NORTH);
         pane.add(month,BorderLayout.CENTER);
         return pane;
     }
@@ -272,6 +256,8 @@ public class Planner extends JFrame implements Runnable
 
         JPanel days = new JPanel();
         days.setLayout(new GridLayout(1,7));
+
+        // constructs tiles before current date
         ArrayList<Tile> tiles = new ArrayList();
         for(long i = x.getDayOfWeek().getValue(); i > 0; i--)
         {
@@ -279,24 +265,30 @@ public class Planner extends JFrame implements Runnable
             tiles.add(temp);
             days.add(temp);
         }
+
+        // constructs current date tile
         Tile now = new Tile(x, cal);
         now.setSelected(true);
         tiles.add(now);
         days.add(now);
+
+        // constructs tiles after current date
         for(long i = x.getDayOfWeek().getValue()-1; i < 5; i++)
         {
             Tile temp = new Tile(x.plusDays(i), cal);
             tiles.add(temp);
             days.add(temp);
         }
+
         for(int i = 0; i < tiles.size(); i++)
         { tiles.get(i).addMouseListener(new calColorChanger(tiles)); }
 
-        week.add(makeHeader(x),BorderLayout.NORTH);
+        week.add(makeHeader(),BorderLayout.NORTH);
         week.add(days,BorderLayout.CENTER);
         return week;
     }
 
+    // constructs day view
     public JPanel makeDay(LocalDate x)
     {
         JPanel day = new JPanel();
@@ -313,9 +305,8 @@ public class Planner extends JFrame implements Runnable
         setSize(1050,725);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         cp.setLayout(new BorderLayout());
-        cp.add(makeHeaderButtons(cp), BorderLayout.NORTH);
+        cp.add(makeHeaderButtons(), BorderLayout.NORTH);
         cp.add(makeSideBar(), BorderLayout.WEST);
-        makeTaskList();
         mainPane.setLayout(new BorderLayout());
         mainPane.add(makeMonth(today, cal),BorderLayout.CENTER);
         cp.add(mainPane, BorderLayout.CENTER);

@@ -1,3 +1,7 @@
+/*
+    This is the newTask module.
+*/
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -48,6 +52,11 @@ public class newTask extends JFrame implements Runnable
         setVisible(true);
     }
 
+    /*
+    * @param    String name     name to be inserted in the task record
+    * @param    String due      due date to be inserted in the task record
+    * @param    String desc     description to be inserted in the task record
+    */
     public void submit(String name, String due, String desc)
     {
         Connection conn = null;
@@ -66,8 +75,6 @@ public class newTask extends JFrame implements Runnable
             ResultSet rs = stmt.executeQuery(getId);
             while(rs.next())
             { taskid = rs.getInt("id"); }
-
-            System.out.println(calid);
 
             String connect = String.format("INSERT INTO calendar_task (calendar_id, task_id) VALUES (%d, %d);", calid, taskid);
             stmt.executeUpdate(connect);

@@ -1,3 +1,13 @@
+/*
+    This is a Task object.
+    It retrieves and holds all the relevant information about a task, given an id:
+        name
+        created date
+        due date
+        content
+        whether it is complete
+*/
+
 import java.time.LocalDate;
 
 import java.util.Properties;

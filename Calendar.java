@@ -1,3 +1,9 @@
+/*
+    This is a Calendar object.
+    When initiated with an id, it pulls from the database all relevant information about the calendar with that id:
+        name/rgb values/description
+*/
+
 import java.util.Properties;
 
 import java.sql.*;

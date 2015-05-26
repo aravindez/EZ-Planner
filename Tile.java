@@ -1,3 +1,7 @@
+/*
+    This constructs a calendar/day tile.
+*/
+
 import javax.swing.SwingConstants;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -72,9 +76,11 @@ public class Tile extends JPanel
     public Tile()
     { this(LocalDate.now(), new Calendar(1), true); }
 
+    // returns whether the tile is selected or not
     public boolean getSelect()
     { return selected; }
 
+    // sets the tile as selected or not selected
     public void setSelected(boolean flag)
     {
         this.selected = flag;
@@ -84,6 +90,7 @@ public class Tile extends JPanel
         { setBackground(new Color(255,255,255)); }
     }
 
+    // gets the tasks for a given calendar and date
     private static ArrayList<Task> getTaskList(int calid, LocalDate date)
     {
         ArrayList<Task> list = new ArrayList<Task>();

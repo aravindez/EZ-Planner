@@ -1,3 +1,7 @@
+/*
+    This is the login module.
+*/
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -19,8 +23,14 @@ public class login extends JFrame implements Runnable
     static final String pass = "avihome";
 
     public login()
-    { super("EZ-Planner"); }
+    { super("EZYLAL Calendar"); }
 
+    /*
+    * @param    JTextField u    the username field
+    * @param    JTextField p    the password field
+    * @return   String[]        a string array with the user and default calendar id's if the username and password are valid
+                                if not, a string array with user and default calendar id's of zero
+    */
     public String[] validate(JTextField u, JTextField p)
     {
         Connection conn = null;
