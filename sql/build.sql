@@ -1,78 +1,78 @@
-drop database if exists `cal`;
-create database `cal`;
-use cal;
+DROP DATABASE IF EXISTS `cal`;
+CREATE DATABASE `cal`;
+USE cal;
 
 -- ---
--- Table 'user'
+-- TABLE 'user'
 -- ---
 
-drop table if exists `user`;
+DROP TABLE IF EXISTS `user`;
 
-create table `user` (
-    id integer not null auto_increment,
-    username char(32) not null unique,
-    password char(128) not null,
-    email varchar(255) not null,
-    first_name varchar(255) not null,
-    last_name varchar(255) not null,
+CREATE TABLE `user` (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    username CHAR(32) NOT NULL UNIQUE,
+    password CHAR(128) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
     primary key (id)
 );
 
 -- ---
--- Table 'calendar'
+-- TABLE 'calendar'
 -- ---
 
-drop table if exists `calendar`;
+DROP TABLE IF EXISTS `calendar`;
 
-create table `calendar` (
-    id integer not null auto_increment,
-    name varchar(255) not null,
-    color char(8) not null,
-    description text default null,
+CREATE TABLE `calendar` (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    color CHAR(8) NOT NULL,
+    description TEXT DEFAULT NULL,
     primary key (id)
 );
 
 -- ---
--- Table 'task'
+-- TABLE 'task'
 -- ---
 
-drop table if exists `task`;
+DROP TABLE IF EXISTS `task`;
 
-create table `task` (
-    id integer not null auto_increment,
-    name varchar(255) not null,
-    curdate date not null,
-    due date not null,
-    content text not null,
-    complete bit not null default 0,
+CREATE TABLE `task` (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    created_on DATE NOT NULL,
+    due DATE NOT NULL,
+    content TEXT NOT NULL,
+    complete BIT NOT NULL DEFAULT 0,
     primary key (id)
 );
 
 -- ---
--- Table 'user_calendar'
+-- TABLE 'user_calendar'
 -- ---
 
-drop table if exists `user_calendar`;
+DROP TABLE IF EXISTS `user_calendar`;
 
-create table `user_calendar` (
-    user_id int not null,
-    calendar_id int not null,
-    owner bit not null,
-    viewCal bit not null,
-    editCal bit not null,
+CREATE TABLE `user_calendar` (
+    user_id INT NOT NULL,
+    calendar_id INT NOT NULL,
+    owner BIT NOT NULL,
+    viewCal BIT NOT NULL,
+    editCal BIT NOT NULL,
     foreign key (user_id) references `user` (id),
     foreign key (calendar_id) references `calendar` (id)
 );
 
 -- ---
--- Table 'calendar_task'
+-- TABLE 'calendar_task'
 -- ---
 
-drop table if exists `calendar_task`;
+DROP TABLE IF EXISTS `calendar_task`;
 
-create table `calendar_task` (
-    calendar_id int not null,
-    task_id int not null,
+CREATE TABLE `calendar_task` (
+    calendar_id INT NOT NULL,
+    task_id int NOT NULL,
     foreign key (calendar_id) references `calendar` (id),
     foreign key (task_id) references `task` (id)
 );

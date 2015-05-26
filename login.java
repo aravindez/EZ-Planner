@@ -44,7 +44,7 @@ public class login extends JFrame implements Runnable
             ResultSet rsCal = stmt.executeQuery(cal);
 
             while(rsCal.next())
-            { calid = rs.getInt("calendar_id"); break; }
+            { calid = rsCal.getInt("calendar_id"); break; }
 
             stmt.close();
             conn.close();

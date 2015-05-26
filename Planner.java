@@ -32,6 +32,8 @@ public class Planner extends JFrame implements Runnable
     private Border line = BorderFactory.createLineBorder(Color.black);
     private int userid;
     private Calendar cal;
+    private Container cp = getContentPane();
+    private ArrayList<Task> taskList = new ArrayList<Task>();
 
     private JPanel descPane = new JPanel();
     private JPanel mainPane = new JPanel();
@@ -44,20 +46,30 @@ public class Planner extends JFrame implements Runnable
     public Planner(int _userid, Calendar _cal)
     { super("EZY-L Calendar"); userid=_userid; cal=_cal;}
 
+    public void monthRefresh()
+    {
+        cp.removeAll();
+        cp.add(makeHeaderButtons(cp),BorderLayout.NORTH);
+        descPane.removeAll();
+        cp.add(makeSideBar(),BorderLayout.WEST);
+        cp.add(makeMonth(today,cal),BorderLayout.CENTER);
+        setVisible(true); 
+    }
+
     public JPanel makeHeaderButtons(Container x)
     {
         JPanel header = new JPanel();
-       header.setLayout(new GridLayout(1,5));
+        header.setLayout(new GridLayout(1,5));
         JButton month = new JButton("Month");
         JButton week = new JButton("Week");
         JButton day = new JButton("Day");
         JButton nTask = new JButton("New Task");
         JButton logout = new JButton("Logout");
-        month.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeMonth(today,cal),BorderLayout.CENTER); setVisible(true); repaint(); });
-        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeWeek(today),BorderLayout.CENTER); setVisible(true); repaint(); });
-        day.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeDay(today),BorderLayout.CENTER); setVisible(true); repaint(); });
-        nTask.addActionListener(e -> { javax.swing.SwingUtilities.invokeLater(new newTask(cal.id)); repaint(); });
-        logout.addActionListener(e -> { dispose(); login.main(new String[0]); });
+        month.addActionListener(e -> { monthRefresh(); });
+        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeWeek(today),BorderLayout.CENTER); setVisible(true); });
+        day.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeDay(today),BorderLayout.CENTER); setVisible(true); });
+        nTask.addActionListener(e -> { dispose(); String[] temp = {Integer.toString(userid),Integer.toString(cal.id)}; newTask.main(temp); });
+        logout.addActionListener(e -> { dispose(); login.main(new String[0]);});
         header.add(month);
         header.add(week);
         header.add(day);
@@ -65,6 +77,33 @@ public class Planner extends JFrame implements Runnable
         header.add(logout);
 
         return header;
+    }
+
+    public void makeTaskList()
+    {
+        Connection conn1 = null;
+        Statement stmt1 = null;
+        try{
+        Class.forName("com.mysql.jdbc.Driver");
+        conn1 = DriverManager.getConnection(dburl,user,pass);
+        
+        stmt1 = conn1.createStatement();
+        String tasks = String.format("SELECT id FROM task AS t INNER JOIN calendar_task AS ct ON ct.task_id=t.id WHERE ct.calendar_id=%d;", cal.id);
+        ResultSet rs = stmt1.executeQuery(tasks);
+        
+        while(rs.next())
+        { taskList.clear(); taskList.add(new Task(rs.getInt("id"))); }
+        rs.close();
+        stmt1.close();
+        conn1.close();
+        }
+        catch(SQLException se) { se.printStackTrace(); }
+        catch(Exception e1) { e1.printStackTrace(); }
+        finally{
+            try{ if(stmt1!=null) { stmt1.close(); } }
+            catch(SQLException se2) {}
+            try{ if(conn1!=null) { conn1.close(); } }
+            catch(SQLException se) { se.printStackTrace(); } }
     }
 
     public JPanel makeSideBar()
@@ -107,37 +146,13 @@ public class Planner extends JFrame implements Runnable
             JButton temp = new JButton("  "+i.name+"  ");
             temp.addActionListener(e ->
                 {
-                    Connection conn1 = null;
-                    Statement stmt1 = null;
                     cal = new Calendar(i.id);
                     mainPane.removeAll();
                     mainPane.add(makeMonth(today, cal),BorderLayout.CENTER);
-                    ArrayList<Task> taskList = new ArrayList<Task>();
-                    try{
-                    Class.forName("com.mysql.jdbc.Driver");
-                    conn1 = DriverManager.getConnection(dburl,user,pass);
-        
-                    stmt1 = conn1.createStatement();
-                    String tasks = String.format("SELECT id FROM task AS t INNER JOIN calendar_task AS ct ON ct.task_id=t.id WHERE ct.calendar_id=%d;", cal.id);
-                    ResultSet rs = stmt1.executeQuery(tasks);
-        
-                    while(rs.next())
-                    { taskList.add(new Task(rs.getInt("id"))); }
-                    rs.close();
-                    stmt1.close();
-                    conn1.close();
-                    }
-                    catch(SQLException se) { se.printStackTrace(); }
-                    catch(Exception e1) { e1.printStackTrace(); }
-                    finally{
-                        try{ if(stmt1!=null) { stmt1.close(); } }
-                        catch(SQLException se2) {}
-                        try{ if(conn1!=null) { conn1.close(); } }
-                        catch(SQLException se) { se.printStackTrace(); } }
+                    makeTaskList();
                     mainPane.add(makeTaskBar(taskList),BorderLayout.EAST);
                     descPane.removeAll();
                     descPane.add(new JLabel(i.description));
-                    mainPane.setVisible(true);
                     descPane.setVisible(true);
                     setVisible(true);
                 });
@@ -285,18 +300,19 @@ public class Planner extends JFrame implements Runnable
         System.out.println(cal.id);
         setSize(1050,725);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
         cp.add(makeHeaderButtons(cp), BorderLayout.NORTH);
         cp.add(makeSideBar(), BorderLayout.WEST);
+        makeTaskList();
         mainPane.setLayout(new BorderLayout());
         mainPane.add(makeMonth(today, cal),BorderLayout.CENTER);
+        mainPane.add(makeTaskBar(taskList),BorderLayout.EAST);
         cp.add(mainPane, BorderLayout.CENTER);
         setVisible(true);
     }
 
     public static void main(String[] args)
-    { javax.swing.SwingUtilities.invokeLater(new Planner(1, new Calendar(1))); }
+    { javax.swing.SwingUtilities.invokeLater(new Planner(Integer.parseInt(args[0]), new Calendar(Integer.parseInt(args[1])))); }
 
     class calColorChanger1 extends calTile implements MouseListener
     {
