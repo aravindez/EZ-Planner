@@ -46,7 +46,7 @@ public class Planner extends JFrame implements Runnable
     static final String pass = "avihome";
 
     public Planner(int _userid, Calendar _cal)
-    { super("EZY-LAL Calendar"); userid=_userid; cal=_cal;}
+    { super("EZ-Planner"); userid=_userid; cal=_cal;}
 
     public void monthRefresh()
     {

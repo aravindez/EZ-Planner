@@ -19,7 +19,7 @@ public class login extends JFrame implements Runnable
     static final String pass = "avihome";
 
     public login()
-    { super("EZY-L Calendar"); }
+    { super("EZ-Planner"); }
 
     public String[] validate(JTextField u, JTextField p)
     {
