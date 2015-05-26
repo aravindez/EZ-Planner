@@ -12,6 +12,7 @@ import java.awt.GridLayout;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -34,6 +35,7 @@ public class Planner extends JFrame implements Runnable
     private Calendar cal;
     private Container cp = getContentPane();
     private ArrayList<Task> taskList = new ArrayList<Task>();
+    private String state = "month";
 
     private JPanel descPane = new JPanel();
     private JPanel mainPane = new JPanel();
@@ -44,15 +46,32 @@ public class Planner extends JFrame implements Runnable
     static final String pass = "avihome";
 
     public Planner(int _userid, Calendar _cal)
-    { super("EZY-L Calendar"); userid=_userid; cal=_cal;}
+    { super("EZY-LAL Calendar"); userid=_userid; cal=_cal;}
 
     public void monthRefresh()
     {
         cp.removeAll();
         cp.add(makeHeaderButtons(cp),BorderLayout.NORTH);
-        descPane.removeAll();
         cp.add(makeSideBar(),BorderLayout.WEST);
         cp.add(makeMonth(today,cal),BorderLayout.CENTER);
+        setVisible(true); 
+    }
+
+    public void weekRefresh()
+    {
+        cp.removeAll(); 
+        cp.add(makeHeaderButtons(cp),BorderLayout.NORTH); 
+        cp.add(makeSideBar(),BorderLayout.WEST);
+        cp.add(makeWeek(today),BorderLayout.CENTER);
+        setVisible(true);
+    }
+
+    public void dayRefresh()
+    {
+        cp.removeAll();
+        cp.add(makeHeaderButtons(cp),BorderLayout.NORTH);
+        cp.add(makeSideBar(),BorderLayout.WEST);
+        cp.add(makeDay(today),BorderLayout.CENTER);
         setVisible(true); 
     }
 
@@ -65,9 +84,9 @@ public class Planner extends JFrame implements Runnable
         JButton day = new JButton("Day");
         JButton nTask = new JButton("New Task");
         JButton logout = new JButton("Logout");
-        month.addActionListener(e -> { monthRefresh(); });
-        week.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeWeek(today),BorderLayout.CENTER); setVisible(true); });
-        day.addActionListener(e -> { x.removeAll(); x.add(makeHeaderButtons(x),BorderLayout.NORTH); descPane.removeAll(); x.add(makeSideBar(),BorderLayout.WEST); x.add(makeDay(today),BorderLayout.CENTER); setVisible(true); });
+        month.addActionListener(e -> { state = "month"; descPane.removeAll(); monthRefresh(); });
+        week.addActionListener(e -> { state = "week"; descPane.removeAll(); weekRefresh(); });
+        day.addActionListener(e -> { state = "day"; descPane.removeAll(); dayRefresh(); });
         nTask.addActionListener(e -> { dispose(); String[] temp = {Integer.toString(userid),Integer.toString(cal.id)}; newTask.main(temp); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]);});
         header.add(month);
@@ -109,6 +128,7 @@ public class Planner extends JFrame implements Runnable
     public JPanel makeSideBar()
     {
         JPanel sidebar = new JPanel();
+        //sidebar.setPreferredSize(new Dimension(175,725));
         sidebar.setLayout(new BorderLayout());
         sidebar.setBorder(line);
         descPane.setLayout(new GridLayout(1,1));
@@ -147,6 +167,9 @@ public class Planner extends JFrame implements Runnable
             temp.addActionListener(e ->
                 {
                     cal = new Calendar(i.id);
+                    if (state == "month") { monthRefresh(); }
+                    else if (state == "week") { weekRefresh(); }
+                    else if (state == "day") { dayRefresh(); }
                     descPane.removeAll();
                     descPane.add(new JLabel(i.description));
                     descPane.setVisible(true);
@@ -214,25 +237,28 @@ public class Planner extends JFrame implements Runnable
         pane.setLayout(new BorderLayout());
         
         JPanel month = new JPanel();
-        month.setLayout(new GridLayout(5,7));
-        for(int i = 1; i <= LocalDate.of(x.getYear(),x.getMonthValue(),1).getDayOfWeek().getValue(); i++)
+        month.setLayout(new GridLayout(6,7));
+
+        long firstDay = LocalDate.of(x.getYear(),x.getMonth(),1).getDayOfWeek().getValue(); 
+        if(firstDay == 7) {firstDay = 0;}
+        long lastDay = LocalDate.of(x.getYear(),x.getMonth(),x.getMonth().maxLength()).getDayOfWeek().getValue();
+        if(lastDay == 7) {lastDay = 0;}
+
+        for(long i = 0; i < firstDay; i++)
+        { month.add(new JPanel()); }
+        ArrayList<Tile> tiles = new ArrayList();
+        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i = i.plusDays(1))
         {
-            JPanel temp = new JPanel();
-            temp.setBorder(line);
-            temp.setBackground(new Color(255,255,255));
-            month.add(new JPanel());
-        }
-        ArrayList<calTile> tiles = new ArrayList();
-        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) < 0; i = i.plusDays(1))
-        {
-            calTile tempTile = new calTile(i, cal);
+            Tile tempTile = new Tile(i, cal, true);
             if(i.compareTo(x) == 0)
             { tempTile.setSelected(true); }
             tiles.add(tempTile);
             month.add(tempTile);
         }
+        for(long i = 0; i < 6 - lastDay; i++)
+        { month.add(new JPanel()); }
         for (int i = 0; i < tiles.size(); i++)
-        { tiles.get(i).addMouseListener(new calColorChanger1(tiles)); }
+        { tiles.get(i).addMouseListener(new calColorChanger(tiles)); }
 
         pane.add(makeHeader(x),BorderLayout.NORTH);
         pane.add(month,BorderLayout.CENTER);
@@ -246,25 +272,25 @@ public class Planner extends JFrame implements Runnable
 
         JPanel days = new JPanel();
         days.setLayout(new GridLayout(1,7));
-        ArrayList<dayTile> tiles = new ArrayList();
+        ArrayList<Tile> tiles = new ArrayList();
         for(long i = x.getDayOfWeek().getValue(); i > 0; i--)
         {
-            dayTile temp = new dayTile(x.minusDays(i), cal);
+            Tile temp = new Tile(x.minusDays(i), cal);
             tiles.add(temp);
             days.add(temp);
         }
-        dayTile now = new dayTile(x, cal);
+        Tile now = new Tile(x, cal);
         now.setSelected(true);
         tiles.add(now);
         days.add(now);
-        for(long i = x.getDayOfWeek().getValue(); i < 6; i++)
+        for(long i = x.getDayOfWeek().getValue()-1; i < 5; i++)
         {
-            dayTile temp = new dayTile(x.plusDays(i), cal);
+            Tile temp = new Tile(x.plusDays(i), cal);
             tiles.add(temp);
             days.add(temp);
         }
         for(int i = 0; i < tiles.size(); i++)
-        { tiles.get(i).addMouseListener(new calColorChanger2(tiles)); }
+        { tiles.get(i).addMouseListener(new calColorChanger(tiles)); }
 
         week.add(makeHeader(x),BorderLayout.NORTH);
         week.add(days,BorderLayout.CENTER);
@@ -278,7 +304,7 @@ public class Planner extends JFrame implements Runnable
         JPanel header = new JPanel();
         header.add(new JLabel(x.getDayOfWeek().getDisplayName(TextStyle.FULL,Locale.ENGLISH)));
         day.add(header,BorderLayout.NORTH);
-        day.add(new dayTile(x,cal));
+        day.add(new Tile(x,cal));
         return day;
     }
 
@@ -299,11 +325,11 @@ public class Planner extends JFrame implements Runnable
     public static void main(String[] args)
     { javax.swing.SwingUtilities.invokeLater(new Planner(Integer.parseInt(args[0]), new Calendar(Integer.parseInt(args[1])))); }
 
-    class calColorChanger1 extends calTile implements MouseListener
+    class calColorChanger extends Tile implements MouseListener
     {
-        private ArrayList<calTile> tiles;
+        private ArrayList<Tile> tiles;
     
-        public calColorChanger1(ArrayList<calTile> _tiles)
+        public calColorChanger(ArrayList<Tile> _tiles)
         { tiles = _tiles; }
     
         public void mousePressed(MouseEvent e) {}
@@ -311,7 +337,7 @@ public class Planner extends JFrame implements Runnable
     
         public void mouseClicked(MouseEvent e)
         {
-            calTile tile = (calTile) e.getSource();
+            Tile tile = (Tile) e.getSource();
             if (tile.getSelect())
             {
                 tile.setBackground(new Color(255,255,255));
@@ -330,7 +356,7 @@ public class Planner extends JFrame implements Runnable
     
         public void mouseEntered(MouseEvent e)
         {
-            calTile tile = (calTile) e.getSource();
+            Tile tile = (Tile) e.getSource();
             if (!tile.getSelect())
             { tile.setBackground(new Color(165,165,165)); }
             //{ tile.setBackground(new Color(111,207,245)); }
@@ -338,97 +364,9 @@ public class Planner extends JFrame implements Runnable
     
         public void mouseExited(MouseEvent e)
         {
-            calTile tile = (calTile) e.getSource();
+            Tile tile = (Tile) e.getSource();
             if (!tile.getSelect())
             { tile.setBackground(new Color(255,255,255)); }
         }
     }
-
-    class calColorChanger2 extends dayTile implements MouseListener
-    {
-        private ArrayList<dayTile> tiles;
-    
-        public calColorChanger2(ArrayList<dayTile> _tiles)
-        { tiles = _tiles; }
-    
-        public void mousePressed(MouseEvent e) {}
-        public void mouseReleased(MouseEvent e) {}
-    
-        public void mouseClicked(MouseEvent e)
-        {
-            dayTile tile = (dayTile) e.getSource();
-            if (tile.getSelect())
-            {
-                tile.setBackground(new Color(255,255,255));
-                tile.setSelected(false);
-            }
-            else
-            {
-                tile.setSelected(true);
-                //tile.setBackground(new Color(64,188,237));
-                for(int i = 0; i < tiles.size(); i++)
-                {
-                    if(!tile.equals(tiles.get(i)))
-                    { tiles.get(i).setSelected(false); }
-                }
-            }
-        }
-
-        public void mouseEntered(MouseEvent e)
-        {
-            dayTile tile = (dayTile) e.getSource();
-            if (!tile.getSelect())
-            { tile.setBackground(new Color(148,148,148)); }
-        }
-    
-        public void mouseExited(MouseEvent e)
-        {
-            dayTile tile = (dayTile) e.getSource();
-            if (!tile.getSelect())
-            { tile.setBackground(new Color(255,255,255)); }
-        }
-    }
-    
-    class calPick implements MouseListener
-    {
-        private Color color;
-        private String desc;
-        private boolean selected;
-
-        public calPick(Color _color, String _desc)
-        { color = _color; desc = _desc; selected = false; }
-
-        public void mousePressed(MouseEvent e) {}
-        public void mouseReleased(MouseEvent e) {}
-            
-        public void mouseClicked(MouseEvent e)
-        {
-            if(selected)
-            {
-                setForeground(color);
-                repaint();
-                descPane.removeAll();
-                descPane.add(new JLabel(desc));
-                descPane.repaint();
-            }
-            else
-            {
-                setForeground(new Color(0,0,0));
-                repaint();
-                descPane.removeAll();
-                descPane.repaint();
-            }
-        }
-    
-        public void mouseEntered(MouseEvent e)
-        {
-            setForeground(color);
-        }
-
-        public void mouseExited(MouseEvent e)
-        {
-            setForeground(new Color(0,0,0));
-        }
-    } 
-
 }
