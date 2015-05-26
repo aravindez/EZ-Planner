@@ -92,6 +92,7 @@ public class login extends JFrame implements Runnable
         cp.add(password);
         cp.add(signin);
         cp.add(exit);
+        getRootPane().setDefaultButton(signin);
         setVisible(true);
     }
 
