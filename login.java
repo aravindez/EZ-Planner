@@ -81,7 +81,7 @@ public class login extends JFrame implements Runnable
         JTextField username = new JTextField();
         JTextField password = new JPasswordField();
         JButton signin = new JButton("Sign In");
-        JButton exit = new JButton("Exit");
+        JButton noo = new JButton("New User");
         signin.addActionListener(e -> {
             String[] check = validate(username, password);
             if (Integer.parseInt(check[0]) == 0)
@@ -95,13 +95,13 @@ public class login extends JFrame implements Runnable
                 Planner.main(check);
             }
         });
-        exit.addActionListener(e -> { System.exit(0); });
+        noo.addActionListener(e -> { newUser.main(new String[0]); });
         cp.add(un);
         cp.add(username);
         cp.add(pw);
         cp.add(password);
         cp.add(signin);
-        cp.add(exit);
+        cp.add(noo);
         getRootPane().setDefaultButton(signin);
         setVisible(true);
     }
