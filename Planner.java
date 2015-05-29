@@ -29,7 +29,7 @@ import java.sql.*;
 public class Planner extends JFrame implements Runnable
 {
     private LocalDate today = LocalDate.now(ZoneId.systemDefault());
-    private LocalDate currDate = today;
+    public LocalDate currDate = today;
     private Border raisedBevel = BorderFactory.createRaisedBevelBorder();
     private Border line = BorderFactory.createLineBorder(Color.black);
     private int userid;
@@ -209,54 +209,58 @@ public class Planner extends JFrame implements Runnable
         monthName.add(new JLabel(currDate.getMonth().getDisplayName(TextStyle.FULL,Locale.ENGLISH)+" - "+currDate.getYear()),SwingConstants.CENTER);
         monthName.setBorder(line);
 
-        JButton back, next;
-        if (currDate.getMonth().getValue()==1)
+        if (state == "month")
         {
-            back = new JButton(Month.of(12).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
-        }
-        else
-        {
-            back = new JButton(Month.of(currDate.getMonth().getValue()-1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
-        }
-        back.setBorder(line);
-        back.addActionListener(e -> {
-            if (currDate.getMonth().getValue() == 1)
+            JButton back, next;
+            if (currDate.getMonth().getValue()==1)
             {
-                currDate = LocalDate.of(currDate.getYear()-1,12,1);
+                back = new JButton(Month.of(12).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
             }
             else
             {
-                currDate = LocalDate.of(currDate.getYear(),currDate.getMonth().getValue()-1,1);
+                back = new JButton(Month.of(currDate.getMonth().getValue()-1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
             }
-            if (state == "month") { monthRefresh(currDate); }
-            else if (state == "week") { weekRefresh(currDate); }
-            else if (state == "day") { dayRefresh(currDate); }
-        });
-        if (currDate.getMonth().getValue()==12)
-        {
-            next = new JButton(Month.of(1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
-        }
-        else
-        {
-            next = new JButton(Month.of(currDate.getMonth().getValue()+1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
-        }
-        next.setBorder(line);
-        next.addActionListener(e -> {
-            if (currDate.getMonth().getValue() == 12)
+            back.setBorder(line);
+            back.addActionListener(e -> {
+                if (currDate.getMonth().getValue() == 1)
+                {
+                    currDate = LocalDate.of(currDate.getYear()-1,12,1);
+                }
+                else
+                {
+                    currDate = LocalDate.of(currDate.getYear(),currDate.getMonth().getValue()-1,1);
+                }
+                if (state == "month") { monthRefresh(currDate); }
+                else if (state == "week") { weekRefresh(currDate); }
+                else if (state == "day") { dayRefresh(currDate); }
+            });
+            if (currDate.getMonth().getValue()==12)
             {
-                currDate = LocalDate.of(currDate.getYear()+1,1,1);
+                next = new JButton(Month.of(1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
             }
             else
             {
-                currDate = LocalDate.of(currDate.getYear(),currDate.getMonth().getValue()+1,1);
+                next = new JButton(Month.of(currDate.getMonth().getValue()+1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
             }
-            if (state == "month") { monthRefresh(currDate); }
-            else if (state == "week") { weekRefresh(currDate); }
-            else if (state == "day") { dayRefresh(currDate); }
-        });
+            next.setBorder(line);
+            next.addActionListener(e -> {
+                if (currDate.getMonth().getValue() == 12)
+                {
+                    currDate = LocalDate.of(currDate.getYear()+1,1,1);
+                }
+                else
+                {
+                    currDate = LocalDate.of(currDate.getYear(),currDate.getMonth().getValue()+1,1);
+                }
+                if (state == "month") { monthRefresh(currDate); }
+                else if (state == "week") { weekRefresh(currDate); }
+                else if (state == "day") { dayRefresh(currDate); }
+            });
 
-        monthWButtons.add(back,BorderLayout.WEST);
-        monthWButtons.add(next,BorderLayout.EAST);
+            monthWButtons.add(back,BorderLayout.WEST);
+            monthWButtons.add(next,BorderLayout.EAST);
+        }
+
         monthWButtons.add(monthName,BorderLayout.CENTER);
 
         monthHeader.add(monthWButtons);
@@ -300,7 +304,7 @@ public class Planner extends JFrame implements Runnable
         ArrayList<Tile> tiles = new ArrayList();
         for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(endDay) <= 0; i = i.plusDays(1))
         {
-            Tile tempTile = new Tile(i, cal, true);
+            Tile tempTile = new Tile(this, i, cal, true);
             if(i.compareTo(x) == 0)
             { tempTile.setSelected(true); }
             tiles.add(tempTile);
@@ -334,21 +338,21 @@ public class Planner extends JFrame implements Runnable
         ArrayList<Tile> tiles = new ArrayList();
         for(long i = x.getDayOfWeek().getValue(); i > 0; i--)
         {
-            Tile temp = new Tile(x.minusDays(i), cal);
+            Tile temp = new Tile(this, x.minusDays(i), cal);
             tiles.add(temp);
             days.add(temp);
         }
 
         // constructs current date tile
-        Tile now = new Tile(x, cal);
+        Tile now = new Tile(this, x, cal);
         now.setSelected(true);
         tiles.add(now);
         days.add(now);
 
         // constructs tiles after current date
-        for(long i = x.getDayOfWeek().getValue()-1; i < 5; i++)
+        for(long i = x.getDayOfWeek().getValue()-2; i < 4; i++)
         {
-            Tile temp = new Tile(x.plusDays(i), cal);
+            Tile temp = new Tile(this, x.plusDays(i), cal);
             tiles.add(temp);
             days.add(temp);
         }
@@ -369,7 +373,7 @@ public class Planner extends JFrame implements Runnable
         JPanel header = new JPanel();
         header.add(new JLabel(x.getDayOfWeek().getDisplayName(TextStyle.FULL,Locale.ENGLISH)));
         day.add(header,BorderLayout.NORTH);
-        day.add(new Tile(x,cal));
+        day.add(new Tile(this,x,cal));
         return day;
     }
 
@@ -410,6 +414,7 @@ public class Planner extends JFrame implements Runnable
             else
             {
                 tile.setSelected(true);
+                tile.setPlannerDate();
                 for(int i = 0; i < tiles.size(); i++)
                 {
                     if(!tile.equals(tiles.get(i)))

@@ -23,6 +23,7 @@ import java.sql.*;
 
 public class Tile extends JPanel
 {
+    private Planner pl;
     private LocalDate date;
     public Calendar cal;
     private boolean isCal;
@@ -35,8 +36,9 @@ public class Tile extends JPanel
     static final String user = "root";
     static final String pass = "avihome";
 
-    public Tile(LocalDate _date, Calendar _cal, boolean _isCal)
+    public Tile(Planner _pl, LocalDate _date, Calendar _cal, boolean _isCal)
     {
+        this.pl = _pl;
         this.date = _date;
         this.cal = _cal;
         this.isCal = _isCal;
@@ -70,11 +72,10 @@ public class Tile extends JPanel
         setBorder(line);
     }
 
-    public Tile(LocalDate _date, Calendar _cal)
-    { this(_date, _cal, false); }
+    public Tile(Planner _pl, LocalDate _date, Calendar _cal)
+    { this(_pl, _date, _cal, false); }
 
-    public Tile()
-    { this(LocalDate.now(), new Calendar(1), true); }
+    public Tile() {}
 
     // returns whether the tile is selected or not
     public boolean getSelect()
@@ -118,5 +119,10 @@ public class Tile extends JPanel
             try{ if(conn!=null) { conn.close(); } }
             catch(SQLException se) { se.printStackTrace(); } }
         return list;
+    }
+
+    public void setPlannerDate()
+    {
+        this.pl.currDate = this.date;
     }
 }
