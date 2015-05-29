@@ -29,6 +29,7 @@ import java.sql.*;
 public class Planner extends JFrame implements Runnable
 {
     private LocalDate today = LocalDate.now(ZoneId.systemDefault());
+    private LocalDate currDate = today;
     private Border raisedBevel = BorderFactory.createRaisedBevelBorder();
     private Border line = BorderFactory.createLineBorder(Color.black);
     private int userid;
@@ -48,32 +49,32 @@ public class Planner extends JFrame implements Runnable
     { super("EZYLAL Calendar"); userid=_userid; cal=_cal;}
 
     // refreshes the month view
-    public void monthRefresh()
+    public void monthRefresh(LocalDate x)
     {
         cp.removeAll();
         cp.add(makeHeaderButtons(),BorderLayout.NORTH);
         cp.add(makeSideBar(),BorderLayout.WEST);
-        cp.add(makeMonth(today,cal),BorderLayout.CENTER);
+        cp.add(makeMonth(x,cal),BorderLayout.CENTER);
         setVisible(true); 
     }
 
     // refreshes the week view
-    public void weekRefresh()
+    public void weekRefresh(LocalDate x)
     {
         cp.removeAll(); 
         cp.add(makeHeaderButtons(),BorderLayout.NORTH); 
         cp.add(makeSideBar(),BorderLayout.WEST);
-        cp.add(makeWeek(today),BorderLayout.CENTER);
+        cp.add(makeWeek(x),BorderLayout.CENTER);
         setVisible(true);
     }
 
     // refreshes the day view
-    public void dayRefresh()
+    public void dayRefresh(LocalDate x)
     {
         cp.removeAll();
         cp.add(makeHeaderButtons(),BorderLayout.NORTH);
         cp.add(makeSideBar(),BorderLayout.WEST);
-        cp.add(makeDay(today),BorderLayout.CENTER);
+        cp.add(makeDay(x),BorderLayout.CENTER);
         setVisible(true); 
     }
 
@@ -87,9 +88,9 @@ public class Planner extends JFrame implements Runnable
         JButton day = new JButton("Day");
         JButton nTask = new JButton("New Task");
         JButton logout = new JButton("Logout");
-        month.addActionListener(e -> { state = "month"; descPane.removeAll(); monthRefresh(); });
-        week.addActionListener(e -> { state = "week"; descPane.removeAll(); weekRefresh(); });
-        day.addActionListener(e -> { state = "day"; descPane.removeAll(); dayRefresh(); });
+        month.addActionListener(e -> { state = "month"; descPane.removeAll(); monthRefresh(currDate); });
+        week.addActionListener(e -> { state = "week"; descPane.removeAll(); weekRefresh(currDate); });
+        day.addActionListener(e -> { state = "day"; descPane.removeAll(); dayRefresh(currDate); });
         nTask.addActionListener(e -> { dispose(); String[] temp = {Integer.toString(userid),Integer.toString(cal.id)}; newTask.main(temp); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]);});
         header.add(month);
@@ -143,9 +144,9 @@ public class Planner extends JFrame implements Runnable
             temp.addActionListener(e ->
                 {
                     cal = new Calendar(i.id);
-                    if (state == "month") { monthRefresh(); }
-                    else if (state == "week") { weekRefresh(); }
-                    else if (state == "day") { dayRefresh(); }
+                    if (state == "month") { monthRefresh(currDate); }
+                    else if (state == "week") { weekRefresh(currDate); }
+                    else if (state == "day") { dayRefresh(currDate); }
                     descPane.removeAll();
                     descPane.add(new JLabel(i.description));
                     descPane.setVisible(true);
@@ -200,10 +201,65 @@ public class Planner extends JFrame implements Runnable
     {
         JPanel monthHeader = new JPanel();
         monthHeader.setLayout(new GridLayout(2,1));
+
+        JPanel monthWButtons = new JPanel();
+        monthWButtons.setLayout(new BorderLayout());
+
         JPanel monthName = new JPanel();
-        monthName.add(new JLabel(today.getMonth().getDisplayName(TextStyle.FULL,Locale.ENGLISH)),SwingConstants.CENTER);
+        monthName.add(new JLabel(currDate.getMonth().getDisplayName(TextStyle.FULL,Locale.ENGLISH)+" - "+currDate.getYear()),SwingConstants.CENTER);
         monthName.setBorder(line);
-        monthHeader.add(monthName);
+
+        JButton back, next;
+        if (currDate.getMonth().getValue()==1)
+        {
+            back = new JButton(Month.of(12).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
+        }
+        else
+        {
+            back = new JButton(Month.of(currDate.getMonth().getValue()-1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
+        }
+        back.setBorder(line);
+        back.addActionListener(e -> {
+            if (currDate.getMonth().getValue() == 1)
+            {
+                currDate = LocalDate.of(currDate.getYear()-1,12,1);
+            }
+            else
+            {
+                currDate = LocalDate.of(currDate.getYear(),currDate.getMonth().getValue()-1,1);
+            }
+            if (state == "month") { monthRefresh(currDate); }
+            else if (state == "week") { weekRefresh(currDate); }
+            else if (state == "day") { dayRefresh(currDate); }
+        });
+        if (currDate.getMonth().getValue()==12)
+        {
+            next = new JButton(Month.of(1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
+        }
+        else
+        {
+            next = new JButton(Month.of(currDate.getMonth().getValue()+1).getDisplayName(TextStyle.FULL,Locale.ENGLISH));
+        }
+        next.setBorder(line);
+        next.addActionListener(e -> {
+            if (currDate.getMonth().getValue() == 12)
+            {
+                currDate = LocalDate.of(currDate.getYear()+1,1,1);
+            }
+            else
+            {
+                currDate = LocalDate.of(currDate.getYear(),currDate.getMonth().getValue()+1,1);
+            }
+            if (state == "month") { monthRefresh(currDate); }
+            else if (state == "week") { weekRefresh(currDate); }
+            else if (state == "day") { dayRefresh(currDate); }
+        });
+
+        monthWButtons.add(back,BorderLayout.WEST);
+        monthWButtons.add(next,BorderLayout.EAST);
+        monthWButtons.add(monthName,BorderLayout.CENTER);
+
+        monthHeader.add(monthWButtons);
         monthHeader.add(weekHeader());
         return monthHeader;
     }
@@ -220,27 +276,44 @@ public class Planner extends JFrame implements Runnable
         // creates variables for the first of the month and the end of the month
         long firstDay = LocalDate.of(x.getYear(),x.getMonth(),1).getDayOfWeek().getValue(); 
         if(firstDay == 7) {firstDay = 0;}
-        long lastDay = LocalDate.of(x.getYear(),x.getMonth(),x.getMonth().maxLength()).getDayOfWeek().getValue();
+
+        long lastDay;
+        LocalDate endDay;
+        if (x.getMonth().getValue() == 2 && !x.isLeapYear())
+        {
+            lastDay = LocalDate.of(x.getYear(),x.getMonth(),28).getDayOfWeek().getValue();
+            endDay = LocalDate.of(x.getYear(),x.getMonth(),28);
+        }
+        else
+        {
+            lastDay = LocalDate.of(x.getYear(),x.getMonth(),x.getMonth().maxLength()).getDayOfWeek().getValue();
+            endDay = LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength());
+        }
         if(lastDay == 7) {lastDay = 0;}
 
         // creates the blank jpanels before the first of the month
+        int counter = 0;
         for(long i = 0; i < firstDay; i++)
-        { month.add(new JPanel()); }
+        { month.add(new JPanel()); counter++; }
 
         // creates the actual month
         ArrayList<Tile> tiles = new ArrayList();
-        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(LocalDate.of(x.getYear(), x.getMonth(), x.getMonth().maxLength())) <= 0; i = i.plusDays(1))
+        for(LocalDate i = LocalDate.of(x.getYear(), x.getMonth(), 1); i.compareTo(endDay) <= 0; i = i.plusDays(1))
         {
             Tile tempTile = new Tile(i, cal, true);
             if(i.compareTo(x) == 0)
             { tempTile.setSelected(true); }
             tiles.add(tempTile);
             month.add(tempTile);
+            counter++;
         }
 
         // creates the blank days after then end of the month
         for(long i = 0; i < 6 - lastDay; i++)
+        { month.add(new JPanel()); counter++; }
+        for(int i = 0; i < 42-counter; i++)
         { month.add(new JPanel()); }
+
         for (int i = 0; i < tiles.size(); i++)
         { tiles.get(i).addMouseListener(new calColorChanger(tiles)); }
 
