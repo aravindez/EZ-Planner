@@ -23,7 +23,7 @@ public class login extends JFrame implements Runnable
     static final String pass = "avihome";
 
     public login()
-    { super("EZYLAL Calendar"); }
+    { super("EZ Planner"); }
 
     /*
     * @param    JTextField u    the username field
