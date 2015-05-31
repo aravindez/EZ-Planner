@@ -18,18 +18,4 @@ INSERT INTO `user`
         'aravindez@gmail.com',
         'Aravind',
         'Ez'
-    ),
-    (
-        'mysterypanda',
-        MD5('liu16y'),
-        'liu16y@ncssm.edu',
-        'Yuxuan',
-        'Liu'
-    ),
-    (
-        'morrison',
-        MD5('mathsadist'),
-        'morrison@ncssm.edu',
-        'John',
-        'Morrison'
     );

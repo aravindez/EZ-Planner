@@ -91,7 +91,7 @@ public class Planner extends JFrame implements Runnable
         month.addActionListener(e -> { state = "month"; descPane.removeAll(); monthRefresh(currDate); });
         week.addActionListener(e -> { state = "week"; descPane.removeAll(); weekRefresh(currDate); });
         day.addActionListener(e -> { state = "day"; descPane.removeAll(); dayRefresh(currDate); });
-        nTask.addActionListener(e -> { dispose(); String[] temp = {Integer.toString(userid),Integer.toString(cal.id)}; newTask.main(temp); });
+        nTask.addActionListener(e -> { dispose(); String[] temp = { Integer.toString(userid),Integer.toString(cal.id)}; newTask.main(temp); });
         logout.addActionListener(e -> { dispose(); login.main(new String[0]);});
         header.add(month);
         header.add(week);
@@ -137,7 +137,15 @@ public class Planner extends JFrame implements Runnable
             catch(SQLException se) { se.printStackTrace(); } }
 
         JPanel buttons = new JPanel();
-        buttons.setLayout(new GridLayout(calList.size(),1));
+        buttons.setLayout(new GridLayout(calList.size()+1,1));
+        JButton addCal = new JButton("Add Calendar");
+        addCal.addActionListener(e ->
+            {
+                dispose();
+                String[] temp = {Integer.toString(userid)};
+                newCal.main(temp);
+            });
+        buttons.add(addCal);
         for(Calendar i : calList)
         {
             JButton temp = new JButton("  "+i.name+"  ");

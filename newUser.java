@@ -21,9 +21,6 @@ import java.sql.*;
 
 public class newUser extends JFrame implements Runnable
 {
-    private int userid;
-    private int calid;
-
     private Container cp = getContentPane();
     private JTextField fname = new JTextField();
     private JTextField lname = new JTextField();
@@ -57,7 +54,7 @@ public class newUser extends JFrame implements Runnable
                 
         JButton add = new JButton("Submit");
         JButton exit = new JButton("Cancel");
-        add.addActionListener(e -> { submit(uname.getText(),pword.getText(),cpword.getText(),email.getText(),fname.getText(),lname.getText()); });
+        add.addActionListener(e -> { submit(uname.getText(),pword.getText(),cpword.getText(),email.getText(),fname.getText(),lname.getText()); dispose(); });
         exit.addActionListener(e -> { dispose(); });
 
         canvas.add(fnm); canvas.add(fname);
@@ -98,26 +95,30 @@ public class newUser extends JFrame implements Runnable
 
             stmt = conn.createStatement();
 
-            int uid;
-            int cid;
+            int uid=0;
+            int cid=0;
             ResultSet rs;
 
             String insertUser = String.format("INSERT INTO user (username, password, email, first_name, last_name) VALUES ('%s', MD5('%s'), '%s', '%s', '%s');", uname, pword, email, fname, lname);
             stmt.executeUpdate(insertUser);
 
-            String getUser = String.format("SELECT id FROM user WHERE username='%s' AND password=MD5('%s') AND email='%s' AND first_name='%s' AND lastname='%s';", uname, pword, email, fname, lname);
+            String getUser = String.format("SELECT id FROM user WHERE username='%s' AND password=MD5('%s') AND email='%s' AND first_name='%s' AND last_name='%s';", uname, pword, email, fname, lname);
             rs = stmt.executeQuery(getUser);
             while(rs.next())
             { uid = rs.getInt("id"); }
 
-            String insertCal = String.format("INSERT INTO calendar (name, color, description) VALUES ('%s', '24002602', '%s %s\'s default calendar');", uname, fname, lname);
+            String insertCal = String.format("INSERT INTO calendar (name, color, description) VALUES ('%s', '24002602', \"%s %s\'s default calendar\");", uname, fname, lname);
             stmt.executeUpdate(insertCal);
 
-            String getCal = String.format("SELECT id FROM calendar WHERE name='%s', description='%s %s\'s default calendar');", uname, fname, lname);
+            String getCal = String.format("SELECT id FROM calendar WHERE name='%s' AND description=\"%s %s\'s default calendar\";", uname, fname, lname);
             rs = stmt.executeQuery(getCal);
             while(rs.next())
             { cid = rs.getInt("id"); }
 
+            String insertUserCal = String.format("INSERT INTO user_calendar (user_id, calendar_id, owner, viewCal, editCal) VALUES (%d, %d, 1, 1, 1);", uid, cid);
+            stmt.executeUpdate(insertUserCal);
+
+            rs.close();
             stmt.close();
             conn.close();
         }

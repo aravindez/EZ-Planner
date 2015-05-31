@@ -19,14 +19,4 @@ INSERT INTO `calendar`
         'Classes',
         '240026026',
         'Class Schedule'
-    ),
-    (
-        'mysterypanda',
-        '240026208',
-        "Yuxuan Liu's default calendar"
-    ),
-    (
-        'morrison',
-        '026051240',
-        "John Morrison's default calendar"
     );

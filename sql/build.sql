@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `calendar`;
 CREATE TABLE `calendar` (
     id INTEGER NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    color CHAR(8) NOT NULL,
+    color CHAR(9) NOT NULL,
     description TEXT DEFAULT NULL,
     primary key (id)
 );
