@@ -1,8 +1,8 @@
 import javax.swing.SwingConstants;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JButton;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 
@@ -32,12 +32,12 @@ public class Planner extends JFrame implements Runnable
     public LocalDate currDate = today;
     private Border raisedBevel = BorderFactory.createRaisedBevelBorder();
     private Border line = BorderFactory.createLineBorder(Color.black);
-    private int userid;
-    private Calendar cal;
+    public int userid;
+    public Calendar cal;
     private Container cp = getContentPane();
-    private String state = "month";
+    public String state = "month";
 
-    private JPanel descPane = new JPanel();
+    public JPanel descPane = new JPanel();
     private JPanel mainPane = new JPanel();
 
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
@@ -148,18 +148,8 @@ public class Planner extends JFrame implements Runnable
         buttons.add(addCal);
         for(Calendar i : calList)
         {
-            JButton temp = new JButton("  "+i.name+"  ");
-            temp.addActionListener(e ->
-                {
-                    cal = new Calendar(i.id);
-                    if (state == "month") { monthRefresh(currDate); }
-                    else if (state == "week") { weekRefresh(currDate); }
-                    else if (state == "day") { dayRefresh(currDate); }
-                    descPane.removeAll();
-                    descPane.add(new JLabel(i.description));
-                    descPane.setVisible(true);
-                    setVisible(true);
-                });
+            JLabel temp = new JLabel("  "+i.name+"  ");
+            temp.addMouseListener(new options(this, i));
             buttons.add(temp);
         }
         sidebar.add(buttons, BorderLayout.NORTH);
@@ -445,5 +435,41 @@ public class Planner extends JFrame implements Runnable
             if (!tile.getSelect())
             { tile.setBackground(new Color(255,255,255)); }
         }
+    }
+
+    class options implements MouseListener
+    {
+        private Planner pl;
+        private Calendar cal;
+
+        public options(Planner _pl, Calendar _cal)
+        { pl = _pl; cal = _cal; }
+
+        public void mousePressed(MouseEvent e) {}
+        public void mouseReleased(MouseEvent e) {}
+        public void mouseClicked(MouseEvent e)
+        {
+            JLabel label = (JLabel) e.getSource();
+
+            if (e.getClickCount() == 2)
+            {
+                dispose();
+                String[] temp = {Integer.toString(pl.userid),Integer.toString(cal.id)};
+                calendarOptions.main(temp);
+            }
+            else
+            {
+                pl.cal = new Calendar(cal.id);
+                if (pl.state == "month") { monthRefresh(currDate); }
+                else if (pl.state == "week") { weekRefresh(currDate); }
+                else if (pl.state == "day") { dayRefresh(currDate); }
+                pl.descPane.removeAll();
+                pl.descPane.add(new JLabel(cal.description));
+                pl.descPane.setVisible(true);
+                pl.setVisible(true);
+            }
+        }
+        public void mouseEntered(MouseEvent e) {}
+        public void mouseExited(MouseEvent e) {}
     }
 }
