@@ -10,6 +10,7 @@ import javax.swing.JButton;
 
 import java.awt.GridLayout;
 import java.awt.Container;
+import java.awt.Checkbox;
 
 import java.util.Properties;
 
@@ -19,11 +20,24 @@ public class login extends JFrame implements Runnable
 {
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
     private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
-    static final String user = "";
+    static final String user = "root";
     static final String pass = "";
+	private static String rememberId;
+	private static String rememberCal;
 
-    public login()
-    { super("EZ Planner"); }
+    public login(boolean reset)
+    {
+		super("EZ Planner");
+		if (reset) {
+			rememberId = null;
+			rememberCal = null;
+		}
+		if (rememberId != null || rememberCal != null) {
+			String[] pass = {rememberId, rememberCal}; 
+			dispose();
+			Planner.main(pass);
+		}
+	}
 
     /*
     * @param    JTextField u    the username field
@@ -75,11 +89,12 @@ public class login extends JFrame implements Runnable
         setSize(250,100);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         Container cp = getContentPane();
-        cp.setLayout(new GridLayout(3,2));
+        cp.setLayout(new GridLayout(4,2));
         JLabel un = new JLabel("username: ");
         JLabel pw = new JLabel("password: ");
         JTextField username = new JTextField();
         JTextField password = new JPasswordField();
+		Checkbox remember = new Checkbox("remember me");
         JButton signin = new JButton("Sign In");
         JButton noo = new JButton("New User");
         signin.addActionListener(e -> {
@@ -91,6 +106,10 @@ public class login extends JFrame implements Runnable
             }
             else
             {
+				if (remember.getState()) {
+					rememberId = check[0];
+					rememberCal = check[1];
+				}
                 dispose();
                 Planner.main(check);
             }
@@ -100,6 +119,8 @@ public class login extends JFrame implements Runnable
         cp.add(username);
         cp.add(pw);
         cp.add(password);
+		cp.add(new JLabel(""));
+		cp.add(remember);
         cp.add(signin);
         cp.add(noo);
         getRootPane().setDefaultButton(signin);
@@ -107,5 +128,15 @@ public class login extends JFrame implements Runnable
     }
 
     public static void main(String [] args)
-    { javax.swing.SwingUtilities.invokeLater(new login()); }
+    {
+		if (args.length != 0) {
+			System.out.println("args1: ");
+			for (String i : args) { System.out.println(i); }
+			javax.swing.SwingUtilities.invokeLater(new login(true));
+		} else {
+			System.out.println("args: ");
+			for (String i : args) { System.out.println(i); }
+			javax.swing.SwingUtilities.invokeLater(new login(false));
+		}
+	}
 }

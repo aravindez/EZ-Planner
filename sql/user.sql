@@ -14,7 +14,7 @@ INSERT INTO `user`
     VALUES
     (
         'aravindez',
-        MD5('avihome97'),
+        MD5('password'),
         'aravindez@gmail.com',
         'Aravind',
         'Ez'

@@ -43,7 +43,7 @@ public class Planner extends JFrame implements Runnable
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
     private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
     static final String user = "root";
-    static final String pass = "avihome";
+    static final String pass = "";
 
     public Planner(int _userid, Calendar _cal)
     { super("EZ Planner"); userid=_userid; cal=_cal;}
@@ -92,7 +92,7 @@ public class Planner extends JFrame implements Runnable
         week.addActionListener(e -> { state = "week"; descPane.removeAll(); weekRefresh(currDate); });
         day.addActionListener(e -> { state = "day"; descPane.removeAll(); dayRefresh(currDate); });
         nTask.addActionListener(e -> { dispose(); String[] temp = { Integer.toString(userid),Integer.toString(cal.id)}; newTask.main(temp); });
-        logout.addActionListener(e -> { dispose(); login.main(new String[0]);});
+        logout.addActionListener(e -> { dispose(); login.main(new String[1]);});
         header.add(month);
         header.add(week);
         header.add(day);
@@ -143,7 +143,7 @@ public class Planner extends JFrame implements Runnable
             {
                 dispose();
                 String[] temp = {Integer.toString(userid)};
-                newCal.main(temp);
+                //newCal.main(temp);
             });
         buttons.add(addCal);
         for(Calendar i : calList)
@@ -455,7 +455,7 @@ public class Planner extends JFrame implements Runnable
             {
                 dispose();
                 String[] temp = {Integer.toString(pl.userid),Integer.toString(cal.id)};
-                calendarOptions.main(temp);
+                //calendarOptions.main(temp);
             }
             else
             {

@@ -34,7 +34,7 @@ public class Tile extends JPanel
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
     private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
     static final String user = "root";
-    static final String pass = "avihome";
+    static final String pass = "";
 
     public Tile(Planner _pl, LocalDate _date, Calendar _cal, boolean _isCal)
     {

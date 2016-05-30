@@ -23,7 +23,7 @@ public class newTask extends JFrame implements Runnable
     private static final String jdbcDriver = "com.mysql.jdbc.Driver";
     private static final String dburl = "jdbc:mysql://127.0.0.1/cal";
     static final String user = "root";
-    static final String pass = "avihome";
+    static final String pass = "";
 
     public newTask(int _userid, int _calid)
     { super("New Task"); userid = _userid; calid = _calid; }
